@@ -40,4 +40,3 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Printf("username %s has been created", username)
 	return nil
 }
-

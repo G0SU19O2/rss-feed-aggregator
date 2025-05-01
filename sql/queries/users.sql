@@ -11,3 +11,6 @@ SELECT * FROM users WHERE name = ? LIMIT 1;
 
 -- name: DeleteUser :execresult
 DELETE FROM users WHERE name = ? LIMIT 1;
+
+-- name: DeleteUsers :exec
+DELETE FROM users;
