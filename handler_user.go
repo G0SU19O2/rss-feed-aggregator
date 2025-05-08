@@ -37,6 +37,10 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("couldn't create user: %w", err)
 	}
+	err = s.cfg.SetUser(username)
+	if err != nil {
+		return fmt.Errorf("couldn't set current user: %w", err)
+	}
 	fmt.Printf("username %s has been created", username)
 	return nil
 }

@@ -9,6 +9,9 @@ VALUES (
 -- name: GetUser :one
 SELECT * FROM users WHERE name = ? LIMIT 1;
 
+-- name: GetUserName :one
+SELECT name FROM users WHERE id = ? LIMIT 1;
+
 -- name: DeleteUser :execresult
 DELETE FROM users WHERE name = ? LIMIT 1;
 
