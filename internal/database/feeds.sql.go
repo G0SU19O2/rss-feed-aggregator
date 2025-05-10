@@ -19,9 +19,9 @@ type CreateFeedParams struct {
 	ID        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      sql.NullString
-	Url       sql.NullString
-	UserID    sql.NullString
+	Name      string
+	Url       string
+	UserID    string
 }
 
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (sql.Result, error) {
@@ -33,6 +33,24 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (sql.Res
 		arg.Url,
 		arg.UserID,
 	)
+}
+
+const getFeedByURL = `-- name: GetFeedByURL :one
+SELECT id, created_at, updated_at, name, url, user_id FROM feeds WHERE url = ? LIMIT 1
+`
+
+func (q *Queries) GetFeedByURL(ctx context.Context, url string) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeedByURL, url)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+	)
+	return i, err
 }
 
 const getFeeds = `-- name: GetFeeds :many

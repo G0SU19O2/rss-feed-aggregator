@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -20,16 +19,28 @@ func handlerAddFeed(s *state, cmd command) error {
 	}
 	feedName := cmd.Args[0]
 	feedURL := cmd.Args[1]
+	feedID := uuid.New().String()
 	_, err = s.db.CreateFeed(context.Background(), database.CreateFeedParams{
-		ID:        uuid.New().String(),
+		ID:        feedID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name:      sql.NullString{String: feedName, Valid: true},
-		Url:       sql.NullString{String: feedURL, Valid: true},
-		UserID:    sql.NullString{String: user.ID, Valid: true},
+		Name:      feedName,
+		Url:       feedURL,
+		UserID:    user.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("couldn't create feed: %w", err)
 	}
+	fmt.Println("Feed created successfully")
+	err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{ID: uuid.New().String(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feedID,
+	})
+	if err != nil {
+		return fmt.Errorf("couldn't create feed follow: %w", err)
+	}
+	fmt.Println("Feed followed successfully")
 	return nil
 }

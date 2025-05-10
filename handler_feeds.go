@@ -18,14 +18,14 @@ func handlerFeeds(s *state, cmd command) error {
 		return fmt.Errorf("couldn't list feeds: %w", err)
 	}
 	for _, feed := range feeds {
-		username, err := s.db.GetUserName(context.Background(), feed.UserID.String)
+		username, err := s.db.GetUserName(context.Background(), feed.UserID)
 		if err != nil {
 			return fmt.Errorf("couldn't get user: %w", err)
 		}
 		fmt.Println("=====================================")
 		fmt.Println(username)
-		fmt.Println(feed.Name.String)
-		fmt.Println(feed.Url.String)
+		fmt.Println(feed.Name)
+		fmt.Println(feed.Url)
 	}
 	fmt.Println("Get feeds successfully!")
 	return nil
