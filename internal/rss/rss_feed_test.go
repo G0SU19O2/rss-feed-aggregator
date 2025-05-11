@@ -1,4 +1,4 @@
-package main
+package rss
 
 import (
 	"context"
@@ -36,17 +36,17 @@ func TestFetchFeed(t *testing.T) {
 </item>
 </channel>
 </rss>`))
-    }))
+	}))
 	defer sever.Close()
-	feed, err := fetchFeed(context.Background(), sever.URL);
+	feed, err := FetchFeed(context.Background(), sever.URL)
 	if err != nil {
 		t.Errorf("Fail to get feed with error: %v", err)
 	}
 	if feed.Channel.Title != "Lane's Blog" {
-        t.Errorf("Expected title 'Lane's Blog', got %s", feed.Channel.Title)
-    }
+		t.Errorf("Expected title 'Lane's Blog', got %s", feed.Channel.Title)
+	}
 
-    if len(feed.Channel.Item) != 2 {
-        t.Errorf("Expected 2 items, got %d", len(feed.Channel.Item))
-    }
+	if len(feed.Channel.Item) != 2 {
+		t.Errorf("Expected 2 items, got %d", len(feed.Channel.Item))
+	}
 }

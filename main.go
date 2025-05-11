@@ -8,6 +8,7 @@ import (
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/config"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/handlers"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -28,15 +29,15 @@ func main() {
 	cmds := cli.Commands{
 		RegisteredCommands: make(map[string]func(*cli.State, cli.Command) error),
 	}
-	cmds.Register("login", handlerLogin)
-	cmds.Register("register", handlerRegister)
-	cmds.Register("reset", handlerReset)
-	cmds.Register("users", handlerUsers)
-	cmds.Register("agg", handlerAgg)
-	cmds.Register("addfeed", handlerAddFeed)
-	cmds.Register("feeds", handlerFeeds)
-	cmds.Register("follow", handlerFollow)
-	cmds.Register("following", handlerFollowing)
+	cmds.Register("login", handlers.HandlerLogin)
+	cmds.Register("register", handlers.HandlerRegister)
+	cmds.Register("reset", handlers.HandlerReset)
+	cmds.Register("users", handlers.HandlerUsers)
+	cmds.Register("agg", handlers.HandlerAgg)
+	cmds.Register("addfeed", handlers.HandlerAddFeed)
+	cmds.Register("feeds", handlers.HandlerFeeds)
+	cmds.Register("follow", handlers.HandlerFollow)
+	cmds.Register("following", handlers.HandlerFollowing)
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
 		return

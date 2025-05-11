@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerLogin(s *cli.State, cmd cli.Command) error {
+func HandlerLogin(s *cli.State, cmd cli.Command) error {
 	argLen := len(cmd.Args)
 	if argLen == 0 {
 		return fmt.Errorf("missing argument")
@@ -28,7 +28,7 @@ func handlerLogin(s *cli.State, cmd cli.Command) error {
 	return nil
 }
 
-func handlerRegister(s *cli.State, cmd cli.Command) error {
+func HandlerRegister(s *cli.State, cmd cli.Command) error {
 	argLen := len(cmd.Args)
 	if argLen == 0 {
 		return fmt.Errorf("missing argument")

@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -12,7 +12,7 @@ func TestHandlerFollowingWithArgs(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "following", Args: []string{"unexpected"}}
-	if err := handlerFollowing(state, cmd); err == nil {
+	if err := HandlerFollowing(state, cmd); err == nil {
 		t.Error("Expected error for passing arguments, got nil")
 	}
 }
@@ -21,7 +21,7 @@ func TestHandlerFollowingUserNotFound(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := handlerFollowing(state, cmd); err == nil {
+	if err := HandlerFollowing(state, cmd); err == nil {
 		t.Error("Expected error for non-existent user, got nil")
 	}
 }
@@ -36,7 +36,7 @@ func TestHandlerFollowingNoFollows(t *testing.T) {
 		t.Fatal("Failed to set user")
 	}
 	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := handlerFollowing(state, cmd); err != nil {
+	if err := HandlerFollowing(state, cmd); err != nil {
 		t.Errorf("Expected no error for no follows, got: %v", err)
 	}
 }
@@ -90,7 +90,7 @@ func TestHandlerFollowingWithFollows(t *testing.T) {
 		t.Fatalf("Failed to follow feed: %v", err)
 	}
 	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := handlerFollowing(state, cmd); err != nil {
+	if err := HandlerFollowing(state, cmd); err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
 }

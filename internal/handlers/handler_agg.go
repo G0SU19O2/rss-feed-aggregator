@@ -1,17 +1,18 @@
-package main
+package handlers
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/rss"
 )
 
-func handlerAgg(s *cli.State, cmd cli.Command) error {
+func HandlerAgg(s *cli.State, cmd cli.Command) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("don't support argument")
 	}
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	feed, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
 	if err != nil {
 		return err
 	}

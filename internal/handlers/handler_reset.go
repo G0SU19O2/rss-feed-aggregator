@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 )
 
-func handlerReset(s *cli.State, cmd cli.Command) error {
+func HandlerReset(s *cli.State, cmd cli.Command) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("don't support argument")
 	}

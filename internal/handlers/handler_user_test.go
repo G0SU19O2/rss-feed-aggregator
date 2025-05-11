@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/config"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 	"github.com/google/uuid"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func setupTestDB(t *testing.T) (*cli.State, func()) {
@@ -59,7 +60,7 @@ func TestLoginWithValidUser(t *testing.T) {
 	defer state.Db.DeleteUser(context.Background(), username)
 
 	cmd := cli.Command{Name: "login", Args: []string{username}}
-	err := handlerLogin(state, cmd)
+	err := HandlerLogin(state, cmd)
 
 	if err != nil {
 		t.Errorf("Expected successful login, got error: %v", err)
@@ -75,7 +76,7 @@ func TestLoginWithNonExistentUser(t *testing.T) {
 	defer cleanup()
 
 	cmd := cli.Command{Name: "login", Args: []string{"nonexistent"}}
-	err := handlerLogin(state, cmd)
+	err := HandlerLogin(state, cmd)
 
 	if err == nil {
 		t.Error("Expected error for non-existent user, got nil")
@@ -89,7 +90,7 @@ func TestRegisterNewUser(t *testing.T) {
 	username := "test_register"
 	cmd := cli.Command{Name: "register", Args: []string{username}}
 
-	err := handlerRegister(state, cmd)
+	err := HandlerRegister(state, cmd)
 	if err != nil {
 		t.Errorf("Expected successful registration, got error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestRegisterDuplicateUser(t *testing.T) {
 	defer state.Db.DeleteUser(context.Background(), username)
 
 	cmd := cli.Command{Name: "register", Args: []string{username}}
-	err := handlerRegister(state, cmd)
+	err := HandlerRegister(state, cmd)
 
 	if err == nil {
 		t.Error("Expected error for duplicate username, got nil")
