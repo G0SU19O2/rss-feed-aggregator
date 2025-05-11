@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 )
 
-func handlerFeeds(s *state, cmd command) error {
+func handlerFeeds(s *cli.State, cmd cli.Command) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("don't support argument")
 	}
-	feeds, err := s.db.GetFeeds(context.Background())
+	feeds, err := s.Db.GetFeeds(context.Background())
 	if len(feeds) == 0 {
 		fmt.Println("No feeds found.")
 		return nil
@@ -18,7 +20,7 @@ func handlerFeeds(s *state, cmd command) error {
 		return fmt.Errorf("couldn't list feeds: %w", err)
 	}
 	for _, feed := range feeds {
-		username, err := s.db.GetUserName(context.Background(), feed.UserID)
+		username, err := s.Db.GetUserName(context.Background(), feed.UserID)
 		if err != nil {
 			return fmt.Errorf("couldn't get user: %w", err)
 		}

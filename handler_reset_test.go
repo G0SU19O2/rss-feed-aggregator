@@ -1,10 +1,14 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+)
 
 func TestResetUsers(t *testing.T) {
 	state, cleanup := setupTestDB(t)
-	cmd := command{Name: "reset", Args: []string{}}
+	cmd := cli.Command{Name: "reset", Args: []string{}}
 	defer cleanup()
 	if err := handlerReset(state, cmd); err != nil {
 		t.Error("Fail to reset users")
@@ -13,7 +17,7 @@ func TestResetUsers(t *testing.T) {
 
 func TestResetUsersFailWithArgs(t *testing.T) {
 	state, cleanup := setupTestDB(t)
-	cmd := command{Name: "reset", Args: []string{"dummy"}}
+	cmd := cli.Command{Name: "reset", Args: []string{"dummy"}}
 	defer cleanup()
 	if err := handlerReset(state, cmd); err == nil {
 		t.Error("Expected error because command have args, got successful")

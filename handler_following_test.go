@@ -4,12 +4,14 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 )
 
 func TestHandlerFollowingWithArgs(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
-	cmd := command{Name: "following", Args: []string{"unexpected"}}
+	cmd := cli.Command{Name: "following", Args: []string{"unexpected"}}
 	if err := handlerFollowing(state, cmd); err == nil {
 		t.Error("Expected error for passing arguments, got nil")
 	}
@@ -18,7 +20,7 @@ func TestHandlerFollowingWithArgs(t *testing.T) {
 func TestHandlerFollowingUserNotFound(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
-	cmd := command{Name: "following", Args: []string{}}
+	cmd := cli.Command{Name: "following", Args: []string{}}
 	if err := handlerFollowing(state, cmd); err == nil {
 		t.Error("Expected error for non-existent user, got nil")
 	}
@@ -28,12 +30,12 @@ func TestHandlerFollowingNoFollows(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	username := "test_following_nofollows"
-	createTestUser(t, state.db, username)
-	defer state.db.DeleteUser(context.Background(), username)
-	if err := state.cfg.SetUser(username); err != nil {
+	createTestUser(t, state.Db, username)
+	defer state.Db.DeleteUser(context.Background(), username)
+	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")
 	}
-	cmd := command{Name: "following", Args: []string{}}
+	cmd := cli.Command{Name: "following", Args: []string{}}
 	if err := handlerFollowing(state, cmd); err != nil {
 		t.Errorf("Expected no error for no follows, got: %v", err)
 	}
@@ -43,18 +45,18 @@ func TestHandlerFollowingWithFollows(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	username := "test_following_withfollows"
-	createTestUser(t, state.db, username)
-	defer state.db.DeleteUser(context.Background(), username)
-	if err := state.cfg.SetUser(username); err != nil {
+	createTestUser(t, state.Db, username)
+	defer state.Db.DeleteUser(context.Background(), username)
+	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")
 	}
 	feedID := "feed-id-456"
 	feedURL := "http://testfeed2.com/rss"
-	user, err := state.db.GetUser(context.Background(), username)
+	user, err := state.Db.GetUser(context.Background(), username)
 	if err != nil {
 		t.Fatal("Failed to get test user")
 	}
-	_, err = state.db.CreateFeed(context.Background(), struct {
+	_, err = state.Db.CreateFeed(context.Background(), struct {
 		ID        string
 		CreatedAt time.Time
 		UpdatedAt time.Time
@@ -72,7 +74,7 @@ func TestHandlerFollowingWithFollows(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test feed: %v", err)
 	}
-	if err := state.db.CreateFeedFollow(context.Background(), struct {
+	if err := state.Db.CreateFeedFollow(context.Background(), struct {
 		ID        string
 		CreatedAt time.Time
 		UpdatedAt time.Time
@@ -87,7 +89,7 @@ func TestHandlerFollowingWithFollows(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("Failed to follow feed: %v", err)
 	}
-	cmd := command{Name: "following", Args: []string{}}
+	cmd := cli.Command{Name: "following", Args: []string{}}
 	if err := handlerFollowing(state, cmd); err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}

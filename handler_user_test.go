@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/config"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 	"github.com/google/uuid"
 )
 
-func setupTestDB(t *testing.T) (*state, func()) {
+func setupTestDB(t *testing.T) (*cli.State, func()) {
 	t.Helper()
 	cfg, err := config.Read()
 	if err != nil {
@@ -24,9 +25,9 @@ func setupTestDB(t *testing.T) (*state, func()) {
 	}
 
 	dbQueries := database.New(db)
-	programState := &state{
-		cfg: &cfg,
-		db:  dbQueries,
+	programState := &cli.State{
+		Cfg: &cfg,
+		Db:  dbQueries,
 	}
 
 	cleanup := func() {
@@ -54,18 +55,18 @@ func TestLoginWithValidUser(t *testing.T) {
 	defer cleanup()
 
 	username := "test_login"
-	createTestUser(t, state.db, username)
-	defer state.db.DeleteUser(context.Background(), username)
+	createTestUser(t, state.Db, username)
+	defer state.Db.DeleteUser(context.Background(), username)
 
-	cmd := command{Name: "login", Args: []string{username}}
+	cmd := cli.Command{Name: "login", Args: []string{username}}
 	err := handlerLogin(state, cmd)
 
 	if err != nil {
 		t.Errorf("Expected successful login, got error: %v", err)
 	}
 
-	if state.cfg.CurrentUserName != username {
-		t.Errorf("Want username: %s, got %s", username, state.cfg.CurrentUserName)
+	if state.Cfg.CurrentUserName != username {
+		t.Errorf("Want username: %s, got %s", username, state.Cfg.CurrentUserName)
 	}
 }
 
@@ -73,7 +74,7 @@ func TestLoginWithNonExistentUser(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	cmd := command{Name: "login", Args: []string{"nonexistent"}}
+	cmd := cli.Command{Name: "login", Args: []string{"nonexistent"}}
 	err := handlerLogin(state, cmd)
 
 	if err == nil {
@@ -86,17 +87,17 @@ func TestRegisterNewUser(t *testing.T) {
 	defer cleanup()
 
 	username := "test_register"
-	cmd := command{Name: "register", Args: []string{username}}
+	cmd := cli.Command{Name: "register", Args: []string{username}}
 
 	err := handlerRegister(state, cmd)
 	if err != nil {
 		t.Errorf("Expected successful registration, got error: %v", err)
 	}
 
-	defer state.db.DeleteUser(context.Background(), username)
+	defer state.Db.DeleteUser(context.Background(), username)
 
 	// Verify user was created
-	user, err := state.db.GetUser(context.Background(), username)
+	user, err := state.Db.GetUser(context.Background(), username)
 	if err != nil {
 		t.Errorf("Failed to get created user: %v", err)
 	}
@@ -110,10 +111,10 @@ func TestRegisterDuplicateUser(t *testing.T) {
 	defer cleanup()
 
 	username := "duplicate_user"
-	createTestUser(t, state.db, username)
-	defer state.db.DeleteUser(context.Background(), username)
+	createTestUser(t, state.Db, username)
+	defer state.Db.DeleteUser(context.Background(), username)
 
-	cmd := command{Name: "register", Args: []string{username}}
+	cmd := cli.Command{Name: "register", Args: []string{username}}
 	err := handlerRegister(state, cmd)
 
 	if err == nil {

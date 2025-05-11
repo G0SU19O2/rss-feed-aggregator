@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 )
 
-func handlerAgg(s *state, cmd command) error {
+func handlerAgg(s *cli.State, cmd cli.Command) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("don't support argument")
 	}

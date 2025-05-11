@@ -5,15 +5,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/config"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 	_ "github.com/go-sql-driver/mysql"
 )
-
-type state struct {
-	cfg *config.Config
-	db  *database.Queries
-}
 
 func main() {
 	cfg, _ := config.Read()
@@ -24,23 +20,23 @@ func main() {
 	defer db.Close()
 
 	dbQueries := database.New(db)
-	programState := &state{
-		cfg: &cfg,
-		db:  dbQueries,
+	programState := &cli.State{
+		Cfg: &cfg,
+		Db:  dbQueries,
 	}
 
-	cmds := commands{
-		registeredCommands: make(map[string]func(*state, command) error),
+	cmds := cli.Commands{
+		RegisteredCommands: make(map[string]func(*cli.State, cli.Command) error),
 	}
-	cmds.register("login", handlerLogin)
-	cmds.register("register", handlerRegister)
-	cmds.register("reset", handlerReset)
-	cmds.register("users", handlerUsers)
-	cmds.register("agg", handlerAgg)
-	cmds.register("addfeed", handlerAddFeed)
-	cmds.register("feeds", handlerFeeds)
-	cmds.register("follow", handlerFollow)
-	cmds.register("following", handlerFollowing)
+	cmds.Register("login", handlerLogin)
+	cmds.Register("register", handlerRegister)
+	cmds.Register("reset", handlerReset)
+	cmds.Register("users", handlerUsers)
+	cmds.Register("agg", handlerAgg)
+	cmds.Register("addfeed", handlerAddFeed)
+	cmds.Register("feeds", handlerFeeds)
+	cmds.Register("follow", handlerFollow)
+	cmds.Register("following", handlerFollowing)
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
 		return
@@ -48,7 +44,7 @@ func main() {
 
 	cmdName := os.Args[1]
 	cmdArgs := os.Args[2:]
-	err = cmds.run(programState, command{Name: cmdName, Args: cmdArgs})
+	err = cmds.Run(programState, cli.Command{Name: cmdName, Args: cmdArgs})
 	if err != nil {
 		log.Fatal(err)
 	}
