@@ -9,6 +9,7 @@ import (
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/config"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/handlers"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/middleware"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -34,10 +35,10 @@ func main() {
 	cmds.Register("reset", handlers.HandlerReset)
 	cmds.Register("users", handlers.HandlerUsers)
 	cmds.Register("agg", handlers.HandlerAgg)
-	cmds.Register("addfeed", handlers.HandlerAddFeed)
+	cmds.Register("addfeed", middleware.LoggedIn(handlers.HandlerAddFeed))
 	cmds.Register("feeds", handlers.HandlerFeeds)
-	cmds.Register("follow", handlers.HandlerFollow)
-	cmds.Register("following", handlers.HandlerFollowing)
+	cmds.Register("follow", middleware.LoggedIn(handlers.HandlerFollow))
+	cmds.Register("following", middleware.LoggedIn(handlers.HandlerFollowing))
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
 		return

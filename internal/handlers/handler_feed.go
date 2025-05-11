@@ -10,18 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
-func HandlerAddFeed(s *cli.State, cmd cli.Command) error {
+func HandlerAddFeed(s *cli.State, cmd cli.Command, user database.User) error {
 	if len(cmd.Args) < 2 {
 		return fmt.Errorf("missing arguments")
-	}
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("can't find current login user: %v", err)
 	}
 	feedName := cmd.Args[0]
 	feedURL := cmd.Args[1]
 	feedID := uuid.New().String()
-	_, err = s.Db.CreateFeed(context.Background(), database.CreateFeedParams{
+	_, err := s.Db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        feedID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

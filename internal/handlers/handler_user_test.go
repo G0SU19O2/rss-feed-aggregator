@@ -38,17 +38,22 @@ func setupTestDB(t *testing.T) (*cli.State, func()) {
 	return programState, cleanup
 }
 
-func createTestUser(t *testing.T, db *database.Queries, username string) {
+func createTestUser(t *testing.T, db *database.Queries, username string) database.User {
 	t.Helper()
+	id := uuid.New().String()
+	createdAt := time.Now()
+	updatedAt := time.Now()
+	name := username
 	_, err := db.CreateUser(context.Background(), database.CreateUserParams{
-		ID:        uuid.New().String(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      username,
+		ID:        id,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		Name:      name,
 	})
 	if err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
 	}
+	return database.User{ID: id, CreatedAt: createdAt, UpdatedAt: createdAt, Name: name}
 }
 
 func TestLoginWithValidUser(t *testing.T) {

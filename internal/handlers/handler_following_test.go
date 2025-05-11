@@ -6,23 +6,15 @@ import (
 	"time"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 )
 
 func TestHandlerFollowingWithArgs(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "following", Args: []string{"unexpected"}}
-	if err := HandlerFollowing(state, cmd); err == nil {
+	if err := HandlerFollowing(state, cmd, database.User{}); err == nil {
 		t.Error("Expected error for passing arguments, got nil")
-	}
-}
-
-func TestHandlerFollowingUserNotFound(t *testing.T) {
-	state, cleanup := setupTestDB(t)
-	defer cleanup()
-	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := HandlerFollowing(state, cmd); err == nil {
-		t.Error("Expected error for non-existent user, got nil")
 	}
 }
 
@@ -30,13 +22,13 @@ func TestHandlerFollowingNoFollows(t *testing.T) {
 	state, cleanup := setupTestDB(t)
 	defer cleanup()
 	username := "test_following_nofollows"
-	createTestUser(t, state.Db, username)
+	user := createTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")
 	}
 	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := HandlerFollowing(state, cmd); err != nil {
+	if err := HandlerFollowing(state, cmd, user); err != nil {
 		t.Errorf("Expected no error for no follows, got: %v", err)
 	}
 }
@@ -90,7 +82,7 @@ func TestHandlerFollowingWithFollows(t *testing.T) {
 		t.Fatalf("Failed to follow feed: %v", err)
 	}
 	cmd := cli.Command{Name: "following", Args: []string{}}
-	if err := HandlerFollowing(state, cmd); err != nil {
+	if err := HandlerFollowing(state, cmd, user); err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
 }

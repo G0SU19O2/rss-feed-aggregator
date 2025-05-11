@@ -5,15 +5,12 @@ import (
 	"fmt"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 )
 
-func HandlerFollowing(s *cli.State, cmd cli.Command) error {
+func HandlerFollowing(s *cli.State, cmd cli.Command, user database.User) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("command does not support argument")
-	}
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("can't find current login user: %v", err)
 	}
 	result, err := s.Db.GetFeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
