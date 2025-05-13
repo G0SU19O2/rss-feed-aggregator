@@ -7,10 +7,11 @@ import (
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
 )
 
 func TestHandlerFollowingWithArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "following", Args: []string{"unexpected"}}
 	if err := HandlerFollowing(state, cmd, database.User{}); err == nil {
@@ -19,10 +20,10 @@ func TestHandlerFollowingWithArgs(t *testing.T) {
 }
 
 func TestHandlerFollowingNoFollows(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	username := "test_following_nofollows"
-	user := createTestUser(t, state.Db, username)
+	user := testutil.CreateTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")
@@ -34,10 +35,10 @@ func TestHandlerFollowingNoFollows(t *testing.T) {
 }
 
 func TestHandlerFollowingWithFollows(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	username := "test_following_withfollows"
-	createTestUser(t, state.Db, username)
+	testutil.CreateTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")

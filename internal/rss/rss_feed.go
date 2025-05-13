@@ -2,11 +2,15 @@ package rss
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
+	"fmt"
 	"html"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
 )
 
 type RSSFeed struct {
@@ -57,4 +61,25 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 
 	return &feed, nil
+}
+
+func ScrapeFeeds(ctx context.Context, db *database.Queries) error {
+	dbFeed, err := db.GetNextFeedToFetch(ctx)
+	if err != nil {
+		return fmt.Errorf("can't get any feed")
+	}
+	time := time.Now()
+	err = db.MarkFeedFetched(ctx, database.MarkFeedFetchedParams{LastFetchedAt: sql.NullTime{Time: time, Valid: true}, UpdatedAt: time, ID: dbFeed.ID})
+	if err != nil {
+		return err
+	}
+	feed, err := FetchFeed(ctx, dbFeed.Url)
+	if err != nil {
+		return err
+	}
+	println("=========================")
+	for _, item := range feed.Channel.Item {
+		fmt.Printf("* %s\n", item.Title)
+	}
+	return nil
 }

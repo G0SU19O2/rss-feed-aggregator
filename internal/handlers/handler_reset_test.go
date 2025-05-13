@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
 )
 
 func TestResetUsers(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	cmd := cli.Command{Name: "reset", Args: []string{}}
 	defer cleanup()
 	if err := HandlerReset(state, cmd); err != nil {
@@ -16,7 +17,7 @@ func TestResetUsers(t *testing.T) {
 }
 
 func TestResetUsersFailWithArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	cmd := cli.Command{Name: "reset", Args: []string{"dummy"}}
 	defer cleanup()
 	if err := HandlerReset(state, cmd); err == nil {

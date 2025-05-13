@@ -7,10 +7,11 @@ import (
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
 )
 
 func TestHandlerFollowFailWithArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "follow", Args: []string{}}
 	if err := HandlerFollow(state, cmd, database.User{}); err == nil {
@@ -23,10 +24,10 @@ func TestHandlerFollowFailWithArgs(t *testing.T) {
 }
 
 func TestHandlerFollowFeedNotFound(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	username := "test_follow_feed_not_found"
-	user := createTestUser(t, state.Db, username)
+	user := testutil.CreateTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")
@@ -38,7 +39,7 @@ func TestHandlerFollowFeedNotFound(t *testing.T) {
 }
 
 func TestHandlerFollowUserNotFound(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	cmd := cli.Command{Name: "follow", Args: []string{"some_feed_url"}}
 	if err := HandlerFollow(state, cmd, database.User{}); err == nil {
@@ -47,10 +48,10 @@ func TestHandlerFollowUserNotFound(t *testing.T) {
 }
 
 func TestHandlerFollowSuccess(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	username := "test_follow_success"
-	createTestUser(t, state.Db, username)
+	testutil.CreateTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 	if err := state.Cfg.SetUser(username); err != nil {
 		t.Fatal("Failed to set user")

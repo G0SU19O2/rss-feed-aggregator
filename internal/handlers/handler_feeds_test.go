@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
 )
 
 func TestHandlerUsersFailWithArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	cmd := cli.Command{Name: "agg", Args: []string{"dummy"}}
 	defer cleanup()
 	if err := HandlerFeeds(state, cmd); err == nil {
@@ -16,7 +17,7 @@ func TestHandlerUsersFailWithArgs(t *testing.T) {
 }
 
 func TestHandlerFeeds(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	cmd := cli.Command{Name: "feeds", Args: []string{}}
 	defer cleanup()
 	if err := HandlerFeeds(state, cmd); err != nil {

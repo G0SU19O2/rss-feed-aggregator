@@ -5,6 +5,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
+	"github.com/google/uuid"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestFetchFeed(t *testing.T) {
@@ -48,5 +54,33 @@ func TestFetchFeed(t *testing.T) {
 
 	if len(feed.Channel.Item) != 2 {
 		t.Errorf("Expected 2 items, got %d", len(feed.Channel.Item))
+	}
+}
+
+func TestScrapeFeeds(t *testing.T) {
+	state, cleanup := testutil.SetupTestDB(t)
+	defer cleanup()
+	username := "test"
+	testutil.CreateTestUser(t, state.Db, username)
+	defer state.Db.DeleteUser(context.Background(), username)
+	if err := state.Cfg.SetUser(username); err != nil {
+		t.Error("Failed to set user")
+	}
+	feedID := uuid.New().String()
+	user := testutil.GetCurrentUser(t, state)
+	_, err := state.Db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        feedID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      "TechCrunch",
+		Url:       "https://techcrunch.com/feed/",
+		UserID:    user.ID,
+	})
+	if err != nil {
+		t.Errorf("couldn't create feed: %v", err)
+	}
+	defer state.Db.DeleteFeed(context.Background(), feedID)
+	if err := ScrapeFeeds(context.Background(), state.Db); err != nil {
+		t.Errorf("Fail to scrape feed: %v", err)
 	}
 }

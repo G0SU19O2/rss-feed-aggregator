@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/cli"
+	"github.com/G0SU19O2/rss-feed-aggregator/internal/testutil"
 )
 
 func TestHandlerUnfollowNoArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-	user := createTestUser(t, state.Db, "test_unfollow_no_args")
+	user := testutil.CreateTestUser(t, state.Db, "test_unfollow_no_args")
 	defer state.Db.DeleteUser(context.Background(), user.Name)
 	cmd := cli.Command{Name: "unfollow", Args: []string{}}
 	err := HandlerUnfollow(state, cmd, user)
@@ -21,9 +22,9 @@ func TestHandlerUnfollowNoArgs(t *testing.T) {
 }
 
 func TestHandlerUnfollowTooManyArgs(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-	user := createTestUser(t, state.Db, "test_unfollow_many_args")
+	user := testutil.CreateTestUser(t, state.Db, "test_unfollow_many_args")
 	defer state.Db.DeleteUser(context.Background(), user.Name)
 	cmd := cli.Command{Name: "unfollow", Args: []string{"url1", "url2"}}
 	err := HandlerUnfollow(state, cmd, user)
@@ -33,9 +34,9 @@ func TestHandlerUnfollowTooManyArgs(t *testing.T) {
 }
 
 func TestHandlerUnfollowFeedNotFound(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-	user := createTestUser(t, state.Db, "test_unfollow_feed_notfound")
+	user := testutil.CreateTestUser(t, state.Db, "test_unfollow_feed_notfound")
 	defer state.Db.DeleteUser(context.Background(), user.Name)
 	cmd := cli.Command{Name: "unfollow", Args: []string{"http://notfound.com/rss"}}
 	err := HandlerUnfollow(state, cmd, user)
@@ -45,10 +46,10 @@ func TestHandlerUnfollowFeedNotFound(t *testing.T) {
 }
 
 func TestHandlerUnfollowSuccess(t *testing.T) {
-	state, cleanup := setupTestDB(t)
+	state, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 	username := "test_unfollow_success"
-	user := createTestUser(t, state.Db, username)
+	user := testutil.CreateTestUser(t, state.Db, username)
 	defer state.Db.DeleteUser(context.Background(), username)
 
 	feedID := "feed-id-unfollow"
