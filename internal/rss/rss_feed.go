@@ -8,9 +8,11 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/G0SU19O2/rss-feed-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -63,23 +65,80 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	return &feed, nil
 }
 
+// Parse date formats found in RSS feeds
+func parseDate(dateStr string) (time.Time, error) {
+	layouts := []string{
+		time.RFC1123Z,
+		time.RFC1123,
+		time.RFC822Z,
+		time.RFC822,
+		time.RFC3339,
+		"Mon, 2 Jan 2006 15:04:05 -0700",
+		"Mon, 2 Jan 2006 15:04:05 MST",
+		"2 Jan 2006 15:04:05 -0700",
+		"2 Jan 2006 15:04:05 MST",
+		"2006-01-02T15:04:05Z",
+		"2006-01-02T15:04:05-07:00",
+	}
+
+	for _, layout := range layouts {
+		t, err := time.Parse(layout, dateStr)
+		if err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("could not parse date: %s", dateStr)
+}
+
 func ScrapeFeeds(ctx context.Context, db *database.Queries) error {
 	dbFeed, err := db.GetNextFeedToFetch(ctx)
 	if err != nil {
-		return fmt.Errorf("can't get any feed")
+		return fmt.Errorf("can't get any feed: %w", err)
 	}
-	time := time.Now()
-	err = db.MarkFeedFetched(ctx, database.MarkFeedFetchedParams{LastFetchedAt: sql.NullTime{Time: time, Valid: true}, UpdatedAt: time, ID: dbFeed.ID})
+
+	now := time.Now()
+	err = db.MarkFeedFetched(ctx, database.MarkFeedFetchedParams{
+		LastFetchedAt: sql.NullTime{Time: now, Valid: true},
+		UpdatedAt:     now,
+		ID:            dbFeed.ID,
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("error marking feed as fetched: %w", err)
 	}
+
 	feed, err := FetchFeed(ctx, dbFeed.Url)
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching feed: %w", err)
 	}
-	println("=========================")
+
+	fmt.Printf("Processing %d items from feed: %s\n", len(feed.Channel.Item), feed.Channel.Title)
+
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("* %s\n", item.Title)
+		pubDate, err := parseDate(item.PubDate)
+		if err != nil {
+			pubDate = time.Now()
+			fmt.Printf("Warning: Failed to parse date '%s', using current time\n", item.PubDate)
+		}
+
+		err = db.CreatePost(ctx, database.CreatePostParams{
+			ID:          uuid.New().String(),
+			CreatedAt:   now,
+			UpdatedAt:   now,
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			FeedID:      dbFeed.ID,
+			PublishedAt: pubDate,
+		})
+
+		if err != nil {
+			if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
+				continue
+			}
+			fmt.Printf("Error saving post '%s': %v\n", item.Title, err)
+		}
 	}
+
 	return nil
 }
